@@ -1,0 +1,17 @@
+## Interface: 20502
+## Author: Roadblock
+## Title: New|cff00ff00MotD|r
+## Notes: 'Guild Message of the Day' splash, with options
+## Version: 0.9.0
+## X-Alpha:
+## X-Website: https://github.com/Road-block/NewMotD
+## OptionalDeps: Ace3
+## SavedVariables: NewMotDDB
+
+## X-Curse-Project-ID:
+## X-WoWI-ID:
+
+Libs\libs.xml
+Locales\locales.xml
+
+core.lua
