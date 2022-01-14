@@ -44,9 +44,49 @@ local defaults = {
 }
 local admincmd, membercmd =
 {type = "group", handler = newmotd, args = {
+    show = {
+      type = "execute",
+      name = _G.SHOW,
+      func = function()
+        newmotd._guildLogo:Show()
+      end,
+      order = 1,
+    },
+    set = {
+      type = "execute",
+      name = _G.EDIT,
+      func = function()
+        StaticPopup_Show("SET_GUILDMOTD")
+      end,
+      order = 2,
+    },
+    options = {
+      type = "execute",
+      name = _G.OPTIONS,
+      func = function()
+        newmotd:showOptions()
+      end,
+      order = 3,
+    },
   }
 },
 {type = "group", handler = newmotd, args = {
+    show = {
+      type = "execute",
+      name = _G.SHOW,
+      func = function()
+        newmotd._guildLogo:Show()
+      end,
+      order = 1,
+    },
+    options = {
+      type = "execute",
+      name = _G.OPTIONS,
+      func = function()
+        newmotd:showOptions()
+      end,
+      order = 2,
+    },
   }
 }
 newmotd.cmdtable = function()
@@ -185,9 +225,7 @@ function newmotd.OnLDBClick(obj,button)
     StaticPopup_Show("SET_GUILDMOTD")
   else
     if button == "MiddleButton" then
-      InterfaceOptionsFrame_Show()
-      newmotd:ScrollToCategory(addonName)
-      InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
+      newmotd:showOptions()
     else
       newmotd:Alert(nil, true)
     end
@@ -291,6 +329,12 @@ function newmotd:deferredInit(guildname)
     self.db:SetProfile(profilekey)
     self._initdone = true
   end
+end
+
+function newmotd:showOptions()
+    InterfaceOptionsFrame_Show()
+    newmotd:ScrollToCategory(addonName)
+    InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
 end
 
 function newmotd:updateTabard(logo)
