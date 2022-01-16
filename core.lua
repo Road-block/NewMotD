@@ -21,10 +21,8 @@ local label = string.format("|cff33ff99%s|r",addonName)
 local out_chat = string.format("%s: %%s",addonName)
 local color_pl = ChatTypeInfo["PARTY_LEADER"]
 local color_g = ChatTypeInfo["GUILD"]
+local color_o = ChatTypeInfo["OFFICER"]
 
---[[
-CURRENT_GUILD_MOTD = GetGuildRosterMOTD();
-]]
 local GetGuildTabardFileNames = _G.GetGuildTabardFileNames or _G.GetGuildTabardFiles
 local defaults = {
   profile = {
@@ -32,7 +30,7 @@ local defaults = {
     history = {},
   },
   char = {
-    delay = 0,
+    delay = 3,
     timeout = 15,
     notincombat = true,
     alpha = 0.9,
@@ -186,7 +184,7 @@ function newmotd:options()
     self._options.args.general.args.settings.args["alpha"] = {
       type = "range",
       name = L["Set Transparency"],
-      desc = L["Set GuildMOTD popup transparency."],
+      desc = L["Set GuildMOTD popup artwork transparency."],
       order = 55,
       get = function() return newmotd.db.char.alpha end,
       set = function(info, val)
@@ -195,7 +193,7 @@ function newmotd:options()
           newmotd._guildLogo:SetAlpha(tonumber(newmotd.db.char.alpha))
         end
       end,
-      min = 0.5,
+      min = 0.0,
       max = 1.0,
       step = 0.1,
       bigStep = 0.1,
@@ -270,7 +268,7 @@ function newmotd:OnInitialize() -- 1. ADDON_LOADED
   self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
   LDBO.type = "launcher"
   LDBO.text = label
-  LDBO.label = string.format("%s %s",addonName,self._versionString)
+  LDBO.label = label -- string.format("%s %s",addonName,self._versionString)
   LDBO.icon = "Interface\\Buttons\\UI-GuildButton-MOTD-Up" -- UI-GuildButton-MOTD-Disabled
   LDBO.OnClick = newmotd.OnLDBClick
   LDBO.OnTooltipShow = newmotd.OnLDBTooltipShow
@@ -309,6 +307,9 @@ function newmotd:deferredInit(guildname)
   local panelHeader = _G.OPTIONS
   if guildname then
     self._guildName = guildname
+    local color = CreateColor(color_pl.r, color_pl.g, color_pl.b)
+    local colored_guildname = "<"..color:WrapTextInColorCode(self._guildName)..">"
+    self._guildmotdLabel = string.gsub(_G.GUILD_MOTD_LABEL2, _G.GUILD, colored_guildname)
     self:RegisterEvent("GUILD_MOTD")
     self:guildBranding()
     self:Alert()
@@ -332,9 +333,13 @@ function newmotd:deferredInit(guildname)
 end
 
 function newmotd:showOptions()
-    InterfaceOptionsFrame_Show()
-    newmotd:ScrollToCategory(addonName)
     InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
+    C_Timer.After(1,function()
+      newmotd:ScrollToCategory(addonName,1)
+      C_Timer.After(1,function()
+        InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
+      end)
+    end)
 end
 
 function newmotd:updateTabard(logo)
@@ -378,13 +383,14 @@ function newmotd:guildBranding()
   f.info:SetPoint("TOP",f,"BOTTOM",0,15)
   f.info:SetTexture("Interface\\GUILDFRAME\\GuildExtra")
   f.info:SetTexCoord(0,0.564,0,0.925)
-  f.info.guildname = f:CreateFontString(nil,"ARTWORK","GameFontNormalLarge")
+  f.info.guildname = f:CreateFontString(nil,"ARTWORK","GameFontNormalLargeOutline")
   f.info.guildname:SetWidth(480)
   f.info.guildname:SetHeight(25)
   f.info.guildname:SetPoint("TOP",f,"TOP",0,-60)
   f.info.guildname:SetJustifyH("CENTER")
-  f.info.guildname:SetTextColor(color_pl.r,color_pl.g,color_pl.b)
-  f.info.guildname:SetText(newmotd._guildName)
+  f.info.guildname:SetTextColor(0.8, 0.8, 1.0)
+  f.info.guildname:SetIgnoreParentAlpha(true)
+  f.info.guildname:SetText(newmotd._guildmotdLabel)
   f.info.guildmotd = f:CreateFontString(nil,"ARTWORK","GameFontNormal")
   f.info.guildmotd:SetWidth(460)
   f.info.guildmotd:SetHeight(80)
@@ -395,8 +401,9 @@ function newmotd:guildBranding()
   f.info.guildmotd:SetMaxLines(4)
   f.info.guildmotd:SetSpacing(4)
   f.info.guildmotd:SetTextColor(color_g.r,color_g.g,color_g.b,1)
-  f.info.guildmotd:SetShadowColor(1,1,0)
+  f.info.guildmotd:SetShadowColor(color_o.r, color_o.g, color_o.b)
   f.info.guildmotd:SetShadowOffset(1,-1)
+  f.info.guildmotd:SetIgnoreParentAlpha(true)
   f.info.guildmotd:SetText(CURRENT_GUILD_MOTD)
 
   f.bgUL = f:CreateTexture(nil, "BACKGROUND")
@@ -467,7 +474,7 @@ function newmotd:guildBranding()
 
   f.mask = f:CreateMaskTexture()
   f.mask:SetTexture("Interface\\Masks\\CircleMaskScalable") -- Interface\\Masks\\CircleMaskScalable / Interface\\Minimap\\UI-Minimap-Background
-  f.mask:SetSize(50,50)
+  f.mask:SetSize(55,55)
   f.mask:SetPoint("CENTER", f, "CENTER", 0,0)
   f.bgUL:AddMaskTexture(f.mask)
   f.bgUR:AddMaskTexture(f.mask)

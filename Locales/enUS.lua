@@ -17,7 +17,7 @@ if not L then return end
   L["Set Delay"] = true
   L["How long in seconds the GuildMOTD popup will delay."] = true
   L["Set Transparency"] = true
-  L["Set GuildMOTD popup transparency."] = true
+  L["Set GuildMOTD popup artwork transparency."] = true
   L.USAGE = [[|cff00ff00NewMotD|r
 Pulls Guild Message of the Day out of all the chatframe spam
 and presents it as a non-blocking popup on screen.
