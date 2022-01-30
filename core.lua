@@ -35,6 +35,7 @@ local defaults = {
     notincombat = true,
     alpha = 0.9,
     onlynew = true,
+    soundfx = true,
     minimap = {
       hide = true,
     },
@@ -46,7 +47,7 @@ local admincmd, membercmd =
       type = "execute",
       name = _G.SHOW,
       func = function()
-        newmotd._guildLogo:Show()
+        newmotd:Toggle(newmotd._guildLogo, true)
       end,
       order = 1,
     },
@@ -73,7 +74,7 @@ local admincmd, membercmd =
       type = "execute",
       name = _G.SHOW,
       func = function()
-        newmotd._guildLogo:Show()
+        newmotd:Toggle(newmotd._guildLogo, true)
       end,
       order = 1,
     },
@@ -153,6 +154,16 @@ function newmotd:options()
         newmotd.db.char.notincombat = not newmotd.db.char.notincombat
       end,
     }
+    self._options.args.general.args.settings.args["soundfx"] = {
+      type = "toggle",
+      name = L["Sound Effect"],
+      desc = L["GuildMOTD popup sound."],
+      order = 35,
+      get = function() return not not newmotd.db.char.soundfx end,
+      set = function(info, val)
+        newmotd.db.char.soundfx = not newmotd.db.char.soundfx
+      end,
+    }
     self._options.args.general.args.settings.args["timeout"] = {
       type = "range",
       name = L["Auto-Hide"],
@@ -163,7 +174,9 @@ function newmotd:options()
         newmotd.db.char.timeout = val
       end,
       min = 5,
-      max = 30,
+      max = 60,
+      softMin = 5,
+      softMax = 30,
       step = 5,
       bigStep = 5,
     }
@@ -177,7 +190,9 @@ function newmotd:options()
         newmotd.db.char.delay = val
       end,
       min = 0,
-      max = 30,
+      max = 120,
+      softMin = 0,
+      softMax = 30,
       step = 1,
       bigStep = 5,
     }
@@ -494,12 +509,12 @@ function newmotd:guildBranding()
       if self:IsMouseOver() then
         self._timeout = 0
         self._elapsed = 0
-        self:Hide()
+        newmotd:Toggle(self,false)
       end
       if self._timeout >= newmotd.db.char.timeout then
         self._timeout = 0
         self._elapsed = 0
-        self:Hide()
+        newmotd:Toggle(self,false)
       end
     end
   end)
@@ -617,6 +632,21 @@ function newmotd:alertTimer(motd)
   self:Alert(motd,true)
 end
 
+function newmotd:Toggle(frame, show)
+  if show then
+    if newmotd.db.char.soundfx then
+      PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN, "Master")
+    end
+    frame:SetAlpha(tonumber(newmotd.db.char.alpha))
+    frame:Show()
+  else
+    if newmotd.db.char.soundfx then
+      PlaySound(SOUNDKIT.IG_SPELLBOOK_CLOSE, "Master")
+    end
+    frame:Hide()
+  end
+end
+
 function newmotd:Alert(motd, now)
   local not_incombat = self.db.char.notincombat
   if not_incombat and UnitAffectingCombat("player") then
@@ -624,8 +654,7 @@ function newmotd:Alert(motd, now)
     return
   end
   if now then
-    self._guildLogo:SetAlpha(tonumber(newmotd.db.char.alpha))
-    self._guildLogo:Show()
+    newmotd:Toggle(newmotd._guildLogo, true)
     return
   end
   local only_new = self.db.char.onlynew
@@ -738,3 +767,6 @@ end
 
 _G[addonName] = newmotd
 
+--[[SOUNDKIT.IG_SPELLBOOK_OPEN
+SOUNDKIT.IG_SPELLBOOK_CLOSE
+SOUNDKIT.IG_ABILITY_PAGE_TURN]]
