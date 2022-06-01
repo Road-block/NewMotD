@@ -660,7 +660,11 @@ function newmotd:Alert(motd, now)
   local only_new = self.db.char.onlynew
   local delay = self.db.char.delay
   local lastmotd = self.db.profile.lastmotd
+  if GetGuildRosterMOTD and CURRENT_GUILD_MOTD ~= (GetGuildRosterMOTD()) then -- workaround for build 43861 breakage
+    CURRENT_GUILD_MOTD = GetGuildRosterMOTD()
+  end
   motd = motd or CURRENT_GUILD_MOTD
+  self._guildLogo.info.guildmotd:SetText(motd)
   if lastmotd ~= motd then
     local epoch, timestamp = self:getServerTime("%Y-%m-%d")
     self.db.profile.lastmotd = motd
