@@ -1,4 +1,4 @@
-## Interface: 40400
+## Interface: 40400,30403
 ## Author: Roadblock
 ## Title: New|cff00ff00MotD|r
 ## Notes: 'Guild Message of the Day' splash, with options
