@@ -13,6 +13,9 @@ local T = LibStub("LibQTip-1.0")
 newmotd._DEBUG = false
 newmotd._classic = _G.WOW_PROJECT_ID and (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC) or false
 newmotd._bcc = _G.WOW_PROJECT_ID and (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_BURNING_CRUSADE_CLASSIC) or false
+newmotd._wrath = _G.WOW_PROJECT_ID and (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_WRATH_CLASSIC) or false
+newmotd._cata = _G.WOW_PROJECT_ID and (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_CATACLYSM_CLASSIC) or false
+newmotd._mists = _G.WOW_PROJECT_ID and (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_MISTS_CLASSIC) or false
 newmotd._playerName = GetUnitName("player")
 newmotd._playerFullName = newmotd._playerName
 
@@ -23,6 +26,13 @@ local color_pl = ChatTypeInfo["PARTY_LEADER"]
 local color_g = ChatTypeInfo["GUILD"]
 local color_o = ChatTypeInfo["OFFICER"]
 
+local GetAddOnMetadata = function(...)
+  if _G.GetAddOnMetadata then
+    return _G.GetAddOnMetadata(...)
+  elseif C_AddOns and C_AddOns.GetAddOnMetadata then
+    return C_AddOns.GetAddOnMetadata(...)
+  end
+end
 local GetGuildTabardFileNames = _G.GetGuildTabardFileNames or _G.GetGuildTabardFiles
 local defaults = {
   profile = {
@@ -348,13 +358,11 @@ function newmotd:deferredInit(guildname)
 end
 
 function newmotd:showOptions()
-    InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
-    C_Timer.After(1,function()
-      newmotd:ScrollToCategory(addonName,1)
-      C_Timer.After(1,function()
-        InterfaceOptionsFrame_OpenToCategory(newmotd.blizzoptions)
-      end)
-    end)
+  if ACD.OpenFrames[addonName] then
+    ACD:Close(addonName)
+  else
+    ACD:Open(addonName,"general")
+  end
 end
 
 function newmotd:updateTabard(logo)
@@ -633,6 +641,7 @@ function newmotd:alertTimer(motd)
 end
 
 function newmotd:Toggle(frame, show)
+  if not frame then return end
   if show then
     if newmotd.db.char.soundfx then
       PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN, "Master")
