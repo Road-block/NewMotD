@@ -33,6 +33,13 @@ local GetAddOnMetadata = function(...)
     return C_AddOns.GetAddOnMetadata(...)
   end
 end
+local GuildRoster = function(...)
+  if _G.GuildRoster then
+    return _G.GuildRoster(...)
+  elseif C_GuildInfo and C_GuildInfo.GuildRoster then
+    return C_GuildInfo.GuildRoster(...)
+  end
+end
 local GetGuildTabardFileNames = _G.GetGuildTabardFileNames or _G.GetGuildTabardFiles
 local defaults = {
   profile = {
@@ -260,7 +267,7 @@ function newmotd.OnLDBTooltipShow(tooltip)
   if not IsInGuild() then
     tooltip:SetText(_G.ERR_GUILD_PLAYER_NOT_IN_GUILD, color_g.r, color_g.g, color_g.b)
   else
-    tooltip:SetText(newmotd._guildName, color_pl.r, color_pl.g, color_pl.b)
+    tooltip:SetText(newmotd._guildName or "", color_pl.r, color_pl.g, color_pl.b)
     tooltip:AddLine(CURRENT_GUILD_MOTD, color_g.r, color_g.g, color_g.b, true)
     tooltip:AddLine(" ")
     tooltip:AddLine(L["|cffff7f00Click|r to show GuildMOTD."])
@@ -333,7 +340,7 @@ function newmotd:deferredInit(guildname)
   if guildname then
     self._guildName = guildname
     local color = CreateColor(color_pl.r, color_pl.g, color_pl.b)
-    local colored_guildname = "<"..color:WrapTextInColorCode(self._guildName)..">"
+    local colored_guildname = "<"..color:WrapTextInColorCode(self._guildName or "")..">"
     self._guildmotdLabel = string.gsub(_G.GUILD_MOTD_LABEL2, _G.GUILD, colored_guildname)
     self:RegisterEvent("GUILD_MOTD")
     self:guildBranding()
@@ -713,7 +720,9 @@ function newmotd:GUILD_MOTD(event, ...)
 end
 
 function newmotd:GUILD_ROSTER_UPDATE()
-  if GuildFrame and GuildFrame:IsShown() or InCombatLockdown() then
+  if InCombatLockdown() then return end
+  local guildFrame = CommunitiesFrame or GuildFrame
+  if guildFrame and guildFrame:IsVisible() then
     return
   end
   local guildname = GetGuildInfo("player")
