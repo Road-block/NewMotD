@@ -1,8 +1,8 @@
-## Interface: 50500
+## Interface: 50501
 ## Author: Roadblock
 ## Title: New|cff00ff00MotD|r
 ## Notes: 'Guild Message of the Day' splash, with options
-## Version: 1.0.5
+## Version: 1.0.6
 ## X-Alpha:
 ## X-Website: https://github.com/Road-block/NewMotD
 ## OptionalDeps: Ace3

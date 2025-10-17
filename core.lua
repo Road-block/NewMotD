@@ -27,17 +27,17 @@ local color_g = ChatTypeInfo["GUILD"]
 local color_o = ChatTypeInfo["OFFICER"]
 
 local GetAddOnMetadata = function(...)
-  if _G.GetAddOnMetadata then
-    return _G.GetAddOnMetadata(...)
-  elseif C_AddOns and C_AddOns.GetAddOnMetadata then
+  if C_AddOns and C_AddOns.GetAddOnMetadata then
     return C_AddOns.GetAddOnMetadata(...)
+  elseif _G.GetAddOnMetadata then
+    return _G.GetAddOnMetadata(...)
   end
 end
 local GuildRoster = function(...)
-  if _G.GuildRoster then
-    return _G.GuildRoster(...)
-  elseif C_GuildInfo and C_GuildInfo.GuildRoster then
+  if C_GuildInfo and C_GuildInfo.GuildRoster then
     return C_GuildInfo.GuildRoster(...)
+  elseif _G.GuildRoster then
+    return _G.GuildRoster(...)
   end
 end
 local GetGuildTabardFileNames = _G.GetGuildTabardFileNames or _G.GetGuildTabardFiles
@@ -72,7 +72,7 @@ local admincmd, membercmd =
       type = "execute",
       name = _G.EDIT,
       func = function()
-        StaticPopup_Show("SET_GUILDMOTD")
+        newmotd:EditMOTD()
       end,
       order = 2,
     },
@@ -252,7 +252,7 @@ end
 function newmotd.OnLDBClick(obj,button)
   if not IsInGuild() then return end
   if newmotd:admin() and button == "RightButton" then
-    StaticPopup_Show("SET_GUILDMOTD")
+    newmotd:EditMOTD()
   else
     if button == "MiddleButton" then
       newmotd:showOptions()
@@ -604,6 +604,18 @@ function newmotd:parseVersion(version,otherVersion)
   end
 end
 
+function newmotd:EditMOTD()
+  if CommunitiesGuildTextEditFrame and CommunitiesFrameGuildDetailsFrameInfo then
+    CommunitiesGuildTextEditFrame_SetType(CommunitiesGuildTextEditFrame, "motd", CommunitiesFrameGuildDetailsFrameInfo)
+    if not CommunitiesGuildTextEditFrame:IsVisible() then
+      ShowUIPanel(CommunitiesGuildTextEditFrame)
+    end
+  elseif StaticPopupDialogs["SET_GUILDMOTD"] then
+    StaticPopupDialogs["SET_GUILDMOTD"].maxLetters = 255
+    StaticPopup_Show("SET_GUILDMOTD")
+  end
+end
+
 function newmotd:make_escable(object,operation)
   if type(object) == "string" then
     local found
@@ -720,6 +732,7 @@ function newmotd:GUILD_MOTD(event, ...)
 end
 
 function newmotd:GUILD_ROSTER_UPDATE()
+  CURRENT_GUILD_MOTD = GetGuildRosterMOTD()
   if InCombatLockdown() then return end
   local guildFrame = CommunitiesFrame or GuildFrame
   if guildFrame and guildFrame:IsVisible() then
